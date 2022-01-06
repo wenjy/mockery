@@ -19,8 +19,14 @@ var (
 	patches = make(map[uintptr]*Patch)
 )
 
-//go:linkname getInternalPtrFromValue reflect.(*Value).pointer
-func getInternalPtrFromValue(v *reflect.Value) unsafe.Pointer
+type value struct {
+	_   uintptr
+	ptr unsafe.Pointer
+}
+
+func getPtr(v *reflect.Value) unsafe.Pointer {
+	return (*value)(unsafe.Pointer(v)).ptr
+}
 
 // 把target方法替换为replacement方法
 func PatchMethod(target, replacement interface{}) (*Patch, error) {
@@ -119,7 +125,7 @@ func applyPatch(patch *Patch) error {
 	lock.Lock()
 	defer lock.Unlock()
 
-	patch.targetBytes = replaceFunction(patch.target.Pointer(), (uintptr)(getInternalPtrFromValue(patch.replacement)))
+	patch.targetBytes = replaceFunction(patch.target.Pointer(), (uintptr)(getPtr(patch.replacement)))
 	patches[patch.target.Pointer()] = patch
 	return nil
 }
