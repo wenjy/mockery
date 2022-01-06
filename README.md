@@ -1,0 +1,2 @@
+# mockery
+Go monkery patching
