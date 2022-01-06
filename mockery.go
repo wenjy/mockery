@@ -26,17 +26,7 @@ func getInternalPtrFromValue(v *reflect.Value) unsafe.Pointer
 func PatchMethod(target, replacement interface{}) (*Patch, error) {
 	t := getValueFrom(target)
 	r := getValueFrom(replacement)
-
-	if err := isPatchable(&t, &r); err != nil {
-		return nil, err
-	}
-
-	patch := &Patch{target: &t, replacement: &r}
-
-	if err := applyPatch(patch); err != nil {
-		return nil, err
-	}
-	return patch, nil
+	return patchValue(&t, &r)
 }
 
 // 把target结构体的methodName方法替换为replacement方法
@@ -48,7 +38,7 @@ func PatchInstanceMethod(target reflect.Type, methodName string, replacement int
 		m, ok = target.MethodByName(methodName)
 	}
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("Method '%v' not found", methodName))
+		return nil, fmt.Errorf("method '%s' not found", methodName)
 	}
 
 	return PatchMethodByReflect(m, replacement)
@@ -71,16 +61,8 @@ func PatchMethodWithMakeFuncValue(target reflect.Value, fn func(args []reflect.V
 
 // 把target反射值替换为replacement方法
 func PatchMethodByReflectValue(target reflect.Value, replacement interface{}) (*Patch, error) {
-	t := &target
 	r := getValueFrom(replacement)
-	if err := isPatchable(t, &r); err != nil {
-		return nil, err
-	}
-	patch := &Patch{target: t, replacement: &r}
-	if err := applyPatch(patch); err != nil {
-		return nil, err
-	}
-	return patch, nil
+	return patchValue(&target, &r)
 }
 
 func (p *Patch) Patch() error {
@@ -96,16 +78,17 @@ func (p *Patch) Patch() error {
 	return nil
 }
 
-func (p *Patch) Unpatch(target interface{}) error {
+func (p *Patch) Unpatch() error {
 	if p == nil {
 		return errors.New("patch is nil")
 	}
-	return applyUnpatch(p)
+	return unpatchValue(*p.target)
 }
 
+// interface{} to reflect.Value
 func getValueFrom(data interface{}) reflect.Value {
-	if cValue, ok := data.(reflect.Value); ok {
-		return cValue
+	if v, ok := data.(reflect.Value); ok {
+		return v
 	} else {
 		return reflect.ValueOf(data)
 	}
@@ -124,7 +107,7 @@ func isPatchable(target, replacement *reflect.Value) error {
 	}
 
 	if target.Type() != replacement.Type() {
-		return errors.New(fmt.Sprintf("the target and redirection doesn't have the same type: %s != %s", target.Type(), replacement.Type()))
+		return fmt.Errorf("the target and redirection doesn't have the same type: %s != %s", target.Type(), replacement.Type())
 	}
 	if _, ok := patches[target.Pointer()]; ok {
 		return errors.New("the target is already patched")
@@ -138,23 +121,37 @@ func applyPatch(patch *Patch) error {
 
 	patch.targetBytes = replaceFunction(patch.target.Pointer(), (uintptr)(getInternalPtrFromValue(patch.replacement)))
 	patches[patch.target.Pointer()] = patch
-
 	return nil
 }
 
-func applyUnpatch(patch *Patch) error {
+func patchValue(target, replacement *reflect.Value) (*Patch, error) {
+	if err := isPatchable(target, replacement); err != nil {
+		return nil, err
+	}
+
+	patch := &Patch{target: target, replacement: replacement}
+
+	if err := applyPatch(patch); err != nil {
+		return nil, err
+	}
+
+	return patch, nil
+}
+
+func unpatchValue(target reflect.Value) error {
 	lock.Lock()
 	defer lock.Unlock()
+
+	patch, ok := patches[target.Pointer()]
+	if !ok {
+		return errors.New("the target is not patched")
+	}
 
 	if patch.targetBytes == nil || len(patch.targetBytes) == 0 {
 		return errors.New("the target is not patched")
 	}
-	tptr := patch.target.Pointer()
-	if _, ok := patches[tptr]; !ok {
-		return errors.New("the target is not patched")
-	}
-	unpatch(tptr, patch)
-	delete(patches, tptr)
+	unpatch(target.Pointer(), patch)
+	delete(patches, target.Pointer())
 	return nil
 }
 
