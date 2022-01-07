@@ -8,6 +8,7 @@ import "syscall"
 var writeAccess = syscall.PROT_READ | syscall.PROT_WRITE | syscall.PROT_EXEC
 var readAccess = syscall.PROT_READ | syscall.PROT_EXEC
 
+//go:nosplit
 func mprotectCrossPage(addr uintptr, length int, prot int) {
 	for p := pageStart(addr); p < addr+uintptr(length); p += uintptr(pageSize) {
 		page := rawMemoryAccess(p, pageSize)

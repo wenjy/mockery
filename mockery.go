@@ -121,11 +121,14 @@ func isPatchable(target, replacement *reflect.Value) error {
 	return nil
 }
 
-func applyPatch(patch *Patch) error {
+func applyPatch(patch *Patch) (err error) {
 	lock.Lock()
 	defer lock.Unlock()
 
-	patch.targetBytes = replaceFunction(patch.target.Pointer(), (uintptr)(getPtr(patch.replacement)))
+	patch.targetBytes, err = replaceFunction(patch.target.Pointer(), (uintptr)(getPtr(patch.replacement)))
+	if err != nil {
+		return
+	}
 	patches[patch.target.Pointer()] = patch
 	return nil
 }

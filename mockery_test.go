@@ -86,6 +86,7 @@ func TestPatcherUsingMakeFunc(t *testing.T) {
 	}
 }
 
+// 测试替换结构体指针的方法
 func TestInstancePatcher(t *testing.T) {
 	mStruct := myStruct{}
 
@@ -112,6 +113,7 @@ func TestInstancePatcher(t *testing.T) {
 	}
 }
 
+// 测试替换结构体的方法
 func TestInstanceValuePatcher(t *testing.T) {
 	mStruct := myStruct{}
 
@@ -138,6 +140,7 @@ func TestInstanceValuePatcher(t *testing.T) {
 	}
 }
 
+// 测试使用反射来替换结构体指针方法
 func TestPatchMethodByReflect(t *testing.T) {
 	mStruct := myStruct{}
 
@@ -169,6 +172,7 @@ func TestPatchMethodByReflect(t *testing.T) {
 	}
 }
 
+// 测试使用反射方法+自定义函数来替换结构体指针方法
 func TestPatchMethodWithMakeFunc(t *testing.T) {
 	mStruct := myStruct{}
 
@@ -198,6 +202,7 @@ func TestPatchMethodWithMakeFunc(t *testing.T) {
 	}
 }
 
+// 测试使用反射值+自定义函数来替换结构体指针方法
 func TestPatchMethodWithMakeFuncValue(t *testing.T) {
 	mStruct := myStruct{}
 
@@ -227,6 +232,7 @@ func TestPatchMethodWithMakeFuncValue(t *testing.T) {
 	}
 }
 
+// 测试使用反射值来替换结构体指针方法
 func TestPatchMethodByReflectValue(t *testing.T) {
 	mStruct := myStruct{}
 

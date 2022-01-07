@@ -4,7 +4,8 @@
 package mockery
 
 // Assembles a jump to a function value
-func jmpToFunctionValue(to uintptr) []byte {
+//go:nosplit
+func jmpToFunctionValue(to uintptr) ([]byte, error) {
 	return []byte{
 		0x48, 0xBA,
 		byte(to),
@@ -16,5 +17,5 @@ func jmpToFunctionValue(to uintptr) []byte {
 		byte(to >> 48),
 		byte(to >> 56), // movabs rdx,to
 		0xFF, 0x22,     // jmp QWORD PTR [rdx]
-	}
+	}, nil
 }
