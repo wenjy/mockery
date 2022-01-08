@@ -2,18 +2,17 @@
 
 Go mockery patching
 
+> 用于Go测试
 
-**只用于Go测试**
+- 代码参考：
 
-- 代码请参考：
-
-[monkey](https://github.com/bouk/monkey) 
+[monkey](https://github.com/bouk/monkey)
 
 [go-mpatch](https://github.com/undefinedlabs/go-mpatch)
 
-- 相关技术博客 
+- 相关技术博客
 
-[go patch 译](https://blog.wenjy.top/2022/01/05/golang/go-patch.html) 
+[go patch 译](https://blog.wenjy.top/2022/01/05/golang/go-patch.html)
 
 [go patch](https://bou.ke/blog/monkey-patching-in-go/)
 
@@ -27,13 +26,15 @@ Go mockery patching
 
 ## 限制
 
-- 目表函数如果使用内联（inlined），将不能替换，可以使用指令`//go:noinline`或者`gcflags=-l`来构建，告诉go编译器禁用内联
+- **目表函数如果使用内联（inlined），将不能替换，可以使用指令`//go:noinline`或者`gcflags=-l`来构建，告诉go编译器禁用内联**
 
-- 需要对包含可执行代码的内存页有写权限，一些操作系统可能会限制这种访问
+- **需要对包含可执行代码的内存页有写权限，一些操作系统可能会限制这种访问**
 
-- 不是线程安全的
+- **不是线程安全的**
 
-## 使用示例
+## 使用教程
+
+`go get github.com/wenjy/mockery`
 
 ### 替换一个函数
 
@@ -63,7 +64,7 @@ func TestPatcher(t *testing.T) {
 }
 ```
 
-### 使用`reflect.ValueOf`替换函数
+### 使用反射值替换函数
 
 ```go
 //go:noinline
