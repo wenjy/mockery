@@ -46,21 +46,21 @@ func methodA() int { return 1 }
 func methodB() int { return 2 }
 
 func TestPatcher(t *testing.T) {
-	patch, err := mpatch.PatchMethod(methodA, methodB)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if methodA() != 2 {
-		t.Fatal("The patch did not work")
-	}
+    patch, err := mpatch.PatchMethod(methodA, methodB)
+    if err != nil {
+        t.Fatal(err)
+    }
+    if methodA() != 2 {
+        t.Fatal("The patch did not work")
+    }
 
-	err = patch.Unpatch()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if methodA() != 1 {
-		t.Fatal("The unpatch did not work")
-	}
+    err = patch.Unpatch()
+    if err != nil {
+        t.Fatal(err)
+    }
+    if methodA() != 1 {
+        t.Fatal("The unpatch did not work")
+    }
 }
 ```
 
@@ -74,22 +74,22 @@ func methodA() int { return 1 }
 func methodB() int { return 2 }
 
 func TestPatcherUsingReflect(t *testing.T) {
-	reflectA := reflect.ValueOf(methodA)
-	patch, err := PatchMethodByReflectValue(reflectA, methodB)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if methodA() != 2 {
-		t.Fatal("The patch did not work")
-	}
+    reflectA := reflect.ValueOf(methodA)
+    patch, err := PatchMethodByReflectValue(reflectA, methodB)
+    if err != nil {
+        t.Fatal(err)
+    }
+    if methodA() != 2 {
+        t.Fatal("The patch did not work")
+    }
 
-	err = patch.Unpatch()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if methodA() != 1 {
-		t.Fatal("The unpatch did not work")
-	}
+    err = patch.Unpatch()
+    if err != nil {
+        t.Fatal(err)
+    }
+    if methodA() != 1 {
+        t.Fatal("The unpatch did not work")
+    }
 }
 ```
 
@@ -100,25 +100,25 @@ func TestPatcherUsingReflect(t *testing.T) {
 func methodA() int { return 1 }
 
 func TestPatcherUsingMakeFunc(t *testing.T) {
-	reflectA := reflect.ValueOf(methodA)
-	patch, err := PatchMethodWithMakeFuncValue(reflectA,
-		func(args []reflect.Value) (results []reflect.Value) {
-			return []reflect.Value{reflect.ValueOf(42)}
-		})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if methodA() != 42 {
-		t.Fatal("The patch did not work")
-	}
+    reflectA := reflect.ValueOf(methodA)
+    patch, err := PatchMethodWithMakeFuncValue(reflectA,
+        func(args []reflect.Value) (results []reflect.Value) {
+            return []reflect.Value{reflect.ValueOf(42)}
+        })
+    if err != nil {
+        t.Fatal(err)
+    }
+    if methodA() != 42 {
+        t.Fatal("The patch did not work")
+    }
 
-	err = patch.Unpatch()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if methodA() != 1 {
-		t.Fatal("The unpatch did not work")
-	}
+    err = patch.Unpatch()
+    if err != nil {
+        t.Fatal(err)
+    }
+    if methodA() != 1 {
+        t.Fatal("The unpatch did not work")
+    }
 }
 ```
 
@@ -130,36 +130,35 @@ type myStruct struct {
 
 //go:noinline
 func (s *myStruct) Method() int {
-	return 1
+    return 1
 }
 
 func TestInstancePatcher(t *testing.T) {
-	mStruct := myStruct{}
+    mStruct := myStruct{}
 
-	var patch *Patch
-	var err error
-	patch, err = PatchInstanceMethod(reflect.TypeOf(mStruct), "Method", func(m *myStruct) int {
-		patch.Unpatch()
-		defer patch.Patch()
-		return 41 + m.Method()
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
+    var patch *Patch
+    var err error
+    patch, err = PatchInstanceMethod(reflect.TypeOf(mStruct), "Method", func(m *myStruct) int {
+        patch.Unpatch()
+        defer patch.Patch()
+        return 41 + m.Method()
+    })
+    if err != nil {
+        t.Fatal(err)
+    }
 
-	if mStruct.Method() != 42 {
-		t.Fatal("The patch did not work")
-	}
-	err = patch.Unpatch()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if mStruct.Method() != 1 {
-		t.Fatal("The unpatch did not work")
-	}
+    if mStruct.Method() != 42 {
+        t.Fatal("The patch did not work")
+    }
+    err = patch.Unpatch()
+    if err != nil {
+        t.Fatal(err)
+    }
+    if mStruct.Method() != 1 {
+        t.Fatal("The unpatch did not work")
+    }
 }
 ```
-
 
 ### 替换结构体的方法
 
@@ -169,33 +168,33 @@ type myStruct struct {
 
 //go:noinline
 func (s myStruct) ValueMethod() int {
-	return 1
+    return 1
 }
 
 func TestInstanceValuePatcher(t *testing.T) {
-	mStruct := myStruct{}
+    mStruct := myStruct{}
 
-	var patch *Patch
-	var err error
-	patch, err = PatchInstanceMethod(reflect.TypeOf(mStruct), "ValueMethod", func(m myStruct) int {
-		patch.Unpatch()
-		defer patch.Patch()
-		return 41 + m.Method()
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
+    var patch *Patch
+    var err error
+    patch, err = PatchInstanceMethod(reflect.TypeOf(mStruct), "ValueMethod", func(m myStruct) int {
+        patch.Unpatch()
+        defer patch.Patch()
+        return 41 + m.Method()
+    })
+    if err != nil {
+        t.Fatal(err)
+    }
 
-	if mStruct.ValueMethod() != 42 {
-		t.Fatal("The patch did not work")
-	}
-	err = patch.Unpatch()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if mStruct.ValueMethod() != 1 {
-		t.Fatal("The unpatch did not work")
-	}
+    if mStruct.ValueMethod() != 42 {
+        t.Fatal("The patch did not work")
+    }
+    err = patch.Unpatch()
+    if err != nil {
+        t.Fatal(err)
+    }
+    if mStruct.ValueMethod() != 1 {
+        t.Fatal("The unpatch did not work")
+    }
 }
 ```
 
@@ -208,37 +207,37 @@ type myStruct struct {
 
 //go:noinline
 func (s *myStruct) Method() int {
-	return 1
+    return 1
 }
 func TestPatchMethodByReflect(t *testing.T) {
-	mStruct := myStruct{}
+    mStruct := myStruct{}
 
-	target := reflect.TypeOf(mStruct)
-	target = reflect.PtrTo(target)
-	m, _ := target.MethodByName("Method")
+    target := reflect.TypeOf(mStruct)
+    target = reflect.PtrTo(target)
+    m, _ := target.MethodByName("Method")
 
-	var patch *Patch
-	var err error
-	patch, err = PatchMethodByReflect(m, func(m *myStruct) int {
-		patch.Unpatch()
-		defer patch.Patch()
-		return 41 + m.Method()
-	})
+    var patch *Patch
+    var err error
+    patch, err = PatchMethodByReflect(m, func(m *myStruct) int {
+        patch.Unpatch()
+        defer patch.Patch()
+        return 41 + m.Method()
+    })
 
-	if err != nil {
-		t.Fatal(err)
-	}
+    if err != nil {
+        t.Fatal(err)
+    }
 
-	if mStruct.Method() != 42 {
-		t.Fatal("The patch did not work")
-	}
-	err = patch.Unpatch()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if mStruct.Method() != 1 {
-		t.Fatal("The unpatch did not work")
-	}
+    if mStruct.Method() != 42 {
+        t.Fatal("The patch did not work")
+    }
+    err = patch.Unpatch()
+    if err != nil {
+        t.Fatal(err)
+    }
+    if mStruct.Method() != 1 {
+        t.Fatal("The unpatch did not work")
+    }
 }
 ```
 
@@ -250,36 +249,36 @@ type myStruct struct {
 
 //go:noinline
 func (s *myStruct) Method() int {
-	return 1
+    return 1
 }
 
 func TestPatchMethodWithMakeFunc(t *testing.T) {
-	mStruct := myStruct{}
+    mStruct := myStruct{}
 
-	target := reflect.TypeOf(mStruct)
-	target = reflect.PtrTo(target)
-	m, _ := target.MethodByName("Method")
+    target := reflect.TypeOf(mStruct)
+    target = reflect.PtrTo(target)
+    m, _ := target.MethodByName("Method")
 
-	var patch *Patch
-	var err error
-	patch, err = PatchMethodWithMakeFunc(m, func(args []reflect.Value) (results []reflect.Value) {
-		return []reflect.Value{reflect.ValueOf(42)}
-	})
+    var patch *Patch
+    var err error
+    patch, err = PatchMethodWithMakeFunc(m, func(args []reflect.Value) (results []reflect.Value) {
+        return []reflect.Value{reflect.ValueOf(42)}
+    })
 
-	if err != nil {
-		t.Fatal(err)
-	}
+    if err != nil {
+        t.Fatal(err)
+    }
 
-	if mStruct.Method() != 42 {
-		t.Fatal("The patch did not work")
-	}
-	err = patch.Unpatch()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if mStruct.Method() != 1 {
-		t.Fatal("The unpatch did not work")
-	}
+    if mStruct.Method() != 42 {
+        t.Fatal("The patch did not work")
+    }
+    err = patch.Unpatch()
+    if err != nil {
+        t.Fatal(err)
+    }
+    if mStruct.Method() != 1 {
+        t.Fatal("The unpatch did not work")
+    }
 }
 ```
 
@@ -291,35 +290,35 @@ type myStruct struct {
 
 //go:noinline
 func (s *myStruct) Method() int {
-	return 1
+    return 1
 }
 func TestPatchMethodWithMakeFuncValue(t *testing.T) {
-	mStruct := myStruct{}
+    mStruct := myStruct{}
 
-	target := reflect.TypeOf(mStruct)
-	target = reflect.PtrTo(target)
-	m, _ := target.MethodByName("Method")
+    target := reflect.TypeOf(mStruct)
+    target = reflect.PtrTo(target)
+    m, _ := target.MethodByName("Method")
 
-	var patch *Patch
-	var err error
-	patch, err = PatchMethodWithMakeFuncValue(m.Func, func(args []reflect.Value) (results []reflect.Value) {
-		return []reflect.Value{reflect.ValueOf(42)}
-	})
+    var patch *Patch
+    var err error
+    patch, err = PatchMethodWithMakeFuncValue(m.Func, func(args []reflect.Value) (results []reflect.Value) {
+        return []reflect.Value{reflect.ValueOf(42)}
+    })
 
-	if err != nil {
-		t.Fatal(err)
-	}
+    if err != nil {
+        t.Fatal(err)
+    }
 
-	if mStruct.Method() != 42 {
-		t.Fatal("The patch did not work")
-	}
-	err = patch.Unpatch()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if mStruct.Method() != 1 {
-		t.Fatal("The unpatch did not work")
-	}
+    if mStruct.Method() != 42 {
+        t.Fatal("The patch did not work")
+    }
+    err = patch.Unpatch()
+    if err != nil {
+        t.Fatal(err)
+    }
+    if mStruct.Method() != 1 {
+        t.Fatal("The unpatch did not work")
+    }
 }
 ```
 
@@ -331,37 +330,37 @@ type myStruct struct {
 
 //go:noinline
 func (s *myStruct) Method() int {
-	return 1
+    return 1
 }
 
 func TestPatchMethodByReflectValue(t *testing.T) {
-	mStruct := myStruct{}
+    mStruct := myStruct{}
 
-	target := reflect.TypeOf(mStruct)
-	target = reflect.PtrTo(target)
-	m, _ := target.MethodByName("Method")
+    target := reflect.TypeOf(mStruct)
+    target = reflect.PtrTo(target)
+    m, _ := target.MethodByName("Method")
 
-	var patch *Patch
-	var err error
-	patch, err = PatchMethodByReflectValue(m.Func, func(m *myStruct) int {
-		patch.Unpatch()
-		defer patch.Patch()
-		return 41 + m.Method()
-	})
+    var patch *Patch
+    var err error
+    patch, err = PatchMethodByReflectValue(m.Func, func(m *myStruct) int {
+        patch.Unpatch()
+        defer patch.Patch()
+        return 41 + m.Method()
+    })
 
-	if err != nil {
-		t.Fatal(err)
-	}
+    if err != nil {
+        t.Fatal(err)
+    }
 
-	if mStruct.Method() != 42 {
-		t.Fatal("The patch did not work")
-	}
-	err = patch.Unpatch()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if mStruct.Method() != 1 {
-		t.Fatal("The unpatch did not work")
-	}
+    if mStruct.Method() != 42 {
+        t.Fatal("The patch did not work")
+    }
+    err = patch.Unpatch()
+    if err != nil {
+        t.Fatal(err)
+    }
+    if mStruct.Method() != 1 {
+        t.Fatal("The unpatch did not work")
+    }
 }
 ```
