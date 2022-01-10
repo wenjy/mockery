@@ -30,9 +30,7 @@ func getPtr(v *reflect.Value) unsafe.Pointer {
 
 // 把target方法替换为replacement方法
 func PatchMethod(target, replacement interface{}) (*Patch, error) {
-	t := getValueFrom(target)
-	r := getValueFrom(replacement)
-	return patchValue(&t, &r)
+	return patchValue(getValueFrom(target), getValueFrom(replacement))
 }
 
 // 把target结构体的methodName方法替换为replacement方法
@@ -68,7 +66,7 @@ func PatchMethodWithMakeFuncValue(target reflect.Value, fn func(args []reflect.V
 // 把target反射值替换为replacement方法
 func PatchMethodByReflectValue(target reflect.Value, replacement interface{}) (*Patch, error) {
 	r := getValueFrom(replacement)
-	return patchValue(&target, &r)
+	return patchValue(&target, r)
 }
 
 func (p *Patch) Patch() error {
@@ -91,12 +89,13 @@ func (p *Patch) Unpatch() error {
 	return unpatchValue(*p.target)
 }
 
-// interface{} to reflect.Value
-func getValueFrom(data interface{}) reflect.Value {
+// interface{} to *reflect.Value
+func getValueFrom(data interface{}) *reflect.Value {
 	if v, ok := data.(reflect.Value); ok {
-		return v
+		return &v
 	} else {
-		return reflect.ValueOf(data)
+		v = reflect.ValueOf(data)
+		return &v
 	}
 }
 
@@ -159,11 +158,13 @@ func unpatchValue(target reflect.Value) error {
 	if patch.targetBytes == nil || len(patch.targetBytes) == 0 {
 		return errors.New("the target is not patched")
 	}
-	unpatch(target.Pointer(), patch)
+	if err := unpatch(target.Pointer(), patch); err != nil {
+		return err
+	}
 	delete(patches, target.Pointer())
 	return nil
 }
 
-func unpatch(target uintptr, p *Patch) {
-	copyToLocation(target, p.targetBytes)
+func unpatch(target uintptr, p *Patch) error {
+	return copyToLocation(target, p.targetBytes)
 }

@@ -30,6 +30,6 @@ func replaceFunction(from, to uintptr) ([]byte, error) {
 	original := make([]byte, len(f))
 	copy(original, f)
 
-	copyToLocation(from, jumpData)
-	return original, nil
+	err = copyToLocation(from, jumpData)
+	return original, err
 }
