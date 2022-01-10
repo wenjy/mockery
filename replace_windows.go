@@ -40,5 +40,4 @@ func copyToLocation(location uintptr, data []byte) error {
 	// current memory protection permissions to, even if you don't want them.
 	var tmp uint32
 	return virtualProtect(location, len(data), oldPerms, unsafe.Pointer(&tmp))
-
 }
