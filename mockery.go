@@ -33,6 +33,10 @@ func PatchMethod(target, replacement interface{}) (*Patch, error) {
 	return patchValue(getValueFrom(target), getValueFrom(replacement))
 }
 
+func PatchInstanceMethodByName(target reflect.Type, methodName string, replacement interface{}) (*Patch, error) {
+	return PatchInstanceMethod(target, methodName, replacement)
+}
+
 // 把target结构体的methodName方法替换为replacement方法
 func PatchInstanceMethod(target reflect.Type, methodName string, replacement interface{}) (*Patch, error) {
 	m, ok := target.MethodByName(methodName)

@@ -113,6 +113,33 @@ func TestInstancePatcher(t *testing.T) {
 	}
 }
 
+// 测试替换结构体指针的方法
+func TestInstancePatcherByName(t *testing.T) {
+	mStruct := myStruct{}
+
+	var patch *Patch
+	var err error
+	patch, err = PatchInstanceMethodByName(reflect.TypeOf(mStruct), "Method", func(m *myStruct) int {
+		patch.Unpatch()
+		defer patch.Patch()
+		return 41 + m.Method()
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if mStruct.Method() != 42 {
+		t.Fatal("The patch did not work")
+	}
+	err = patch.Unpatch()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mStruct.Method() != 1 {
+		t.Fatal("The unpatch did not work")
+	}
+}
+
 // 测试替换结构体的方法
 func TestInstanceValuePatcher(t *testing.T) {
 	mStruct := myStruct{}
@@ -120,6 +147,33 @@ func TestInstanceValuePatcher(t *testing.T) {
 	var patch *Patch
 	var err error
 	patch, err = PatchInstanceMethod(reflect.TypeOf(mStruct), "ValueMethod", func(m myStruct) int {
+		patch.Unpatch()
+		defer patch.Patch()
+		return 41 + m.Method()
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if mStruct.ValueMethod() != 42 {
+		t.Fatal("The patch did not work")
+	}
+	err = patch.Unpatch()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mStruct.ValueMethod() != 1 {
+		t.Fatal("The unpatch did not work")
+	}
+}
+
+// 测试替换结构体的方法
+func TestInstanceValuePatcherByName(t *testing.T) {
+	mStruct := myStruct{}
+
+	var patch *Patch
+	var err error
+	patch, err = PatchInstanceMethodByName(reflect.TypeOf(mStruct), "ValueMethod", func(m myStruct) int {
 		patch.Unpatch()
 		defer patch.Patch()
 		return 41 + m.Method()
